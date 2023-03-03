@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/@sakun/system.css" />
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <button aria-label="Close" class="close"></button>
+            <h1 class="title">Crawl Jobs</h1>
+            <button aria-label="Resize" class="resize"></button>
+        </div>
+        <section class="menu">
+            <ul role="menu-bar">
+                <li role="menu-item" tabindex="0" aria-haspopup="true">
+                  File
+                  <ul role="menu">
+                    <li role="menu-item"><a href="#menu">Action</a></li>
+                    <li role="menu-item"><a href="#menu">Another Action</a></li>
+                    <li role="menu-item" class="divider"><a href="#menu">Something else here</a></li>
+                    <li role="menu-item"><a href="https://twitter.com/sakofchit">sakun's twitter</a></li>
+                  </ul>
+                </li>
+                <li role="menu-item" tabindex="0" aria-haspopup="true">
+                  Edit
+                  <ul role="menu">
+                    <li role="menu-item"><a href="#menu">Action</a></li>
+                    <li role="menu-item"><a href="#menu">Another Action</a></li>
+                    <li role="menu-item" class="divider"><a href="#menu">Something else here</a></li>
+                    <li role="menu-item"><a href="https://sakun.co">sakun's projects</a></li>
+                  </ul>
+                </li>
+                <li role="menu-item" tabindex="0" aria-haspopup="true">
+                  View
+                  <ul role="menu">
+                    <li role="menu-item"><a href="#menu">Action</a></li>
+                    <li role="menu-item"><a href="#menu">Another Action</a></li>
+                    <li role="menu-item"><a href="#menu">Something else here</a></li>
+                  </ul>
+                </li>
+                <li role="menu-item" tabindex="0" aria-haspopup="true">
+                  Special
+                  <ul role="menu">
+                    <li role="menu-item"><a href="#menu">You</a></li>
+                    <li role="menu-item"><a href="#menu">Get the</a></li>
+                    <li role="menu-item"><a href="#menu">Idea</a></li>
+                  </ul>
+                </li>
+              </ul>
+        </section>
+        <main class="window-pane">
+            <section>  
+                <h1 class="title">Choose which page to get the job data from</h1>
+                <input class="page" type="text" />
+            </section>
+            <section>
+                <h1 class="title">Choose where to get the job data from</h1>
+                <button class="btn linkedin">LinkedIn</button>
+                <button class="btn seek">Seek</button>
+            </section>
+        </main>
+    </div>
+    
+    <script type="text/javascript">
+        const linkedin = document.querySelector('.linkedin');
+        const seek = document.querySelector('.seek');
+        const page = document.querySelector('.page');
+        linkedin.onclick= (e) =>{
+            const getPage = page.value;
+            location.href="/linkedin/" + getPage;
+            return false;
+        }
+        seek.onclick=(e)=>{
+            const getPage=page.value;
+            location.href="/seek/" + getPage;
+            return false;
+        }
+    </script>
+</body>
+</html>
