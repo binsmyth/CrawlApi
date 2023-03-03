@@ -42,3 +42,6 @@ yarn.lock
 
 #key files
 keys
+
+#frontend files
+frontend
