@@ -1,20 +1,21 @@
 import * as cheerio from 'cheerio';
 import axios, { AxiosResponse } from 'axios';
 import { db } from './lib/connectfirestore';
-import { collection, getDocs, QuerySnapshot } from 'firebase/firestore/lite';
+import { collection, getDocs, QuerySnapshot, setDoc, doc, CollectionReference, DocumentData } from 'firebase/firestore/lite';
 import * as TE from 'fp-ts/TaskEither';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { curry } from './lib/curry';
 import 'firebase/firestore';
-import { connectfirestoreadmin } from './lib/connectfireadmin'
-
-const dbadmin = connectfirestoreadmin();
+import * as d from 'fp-ts/Date';
 
 export interface Job {
     company: string;
     title: string | null;
     href: string | undefined;
+}
+interface jobsite extends Job{
+    site: string;
 }
 
 //A function to getdata from url provided.
@@ -39,30 +40,35 @@ export async function loadCheerio(response : Promise<E.Either<Error,AxiosRespons
     )
     return cheerio.load(htmlForCheerio);
 }
+//Function to get job collection
+function getJobCollection(): (A: string)=> CollectionReference<DocumentData>{
+   return curry((database:any, collectid: any) => collection(database, collectid))(db);
+}
   
   //Inserting job details into Database
 export async function insertIntoDb(site: string, jobs: Promise<Job[]>): Promise<void> {
-    const alljobs = await jobs;
-    const insertFireDb = async({company, title, href, site} : any) => await dbadmin.collection('jobs').doc(`${href}`.replace(/\D/g, "")).set({'company':company, 'title': title, 'href': href, 'site': site});
+    const curriedJobCollection = getJobCollection();
+    const date = d.create();
+    const insertFireDb = (date: Date) => async({company, title, href, site}: jobsite) => await setDoc(doc(curriedJobCollection('jobs'),`${href}`.replace(/\D/g, "")), {'company':company, 'title': title, 'href': href, 'site': site, 'crawled_date': date});
+
     //This puts job details into firebase store
-    const jobadd  = alljobs.map(async({ company, title, href })=>{
+    const jobadd  = (await jobs).map(({ company, title, href })=>{
         return (
             pipe(
                     {company, title, href, site},
-                    insertFireDb
+                    insertFireDb(date),
                 )
         )
     });
     await Promise.all(jobadd);
 }
 
-
-
 //For viewing all database from firebase
 export function getDataFirebase (): Promise<any> {
-    const jobCollection = (database:any , collectid:any) => collection(database, collectid);
-    const curriedJobCollection = curry(jobCollection)(db);
-    const querySnapshot = async (jobCollection:any):Promise<QuerySnapshot<unknown>> => await getDocs(jobCollection);
+    // const jobCollection = (database:any , collectid:any) => collection(database, collectid);
+    // const curriedJobCollection = curry(jobCollection)(db);
+    const curriedJobCollection = getJobCollection();
+    const querySnapshot = async (jobCollect:any):Promise<QuerySnapshot<unknown>> => await getDocs(jobCollect);
     const alljobs = async (querySnapshot:any) => (await querySnapshot).docs.map((snapshot:any) => snapshot.data());
     return pipe(
         'jobs',

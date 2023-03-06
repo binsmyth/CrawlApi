@@ -37,31 +37,23 @@ app.get('/linkedin/:id?', (req: Request, res: Response) => {
 
 app.get('/view/seek', async (req: Request, res: Response) => {
   const data = await getDataFirebase();
-  pool.query('Select * from job', async (err, result) => {
-    if(err){
-      console.log(err);
-    }
-  })
   res.send(data)
 })
 
 //Get Clicked Job Detail
-app.get('/get/detail', (req:Request, res:Response) =>{
+app.get('/view/detail', async (req:Request, res:Response) =>{
   const href = req.query.href;
   const site = req.query.site;
   const url : string = buildUrlString(href, site);
-  const asynclog = async(x : any) => {
-    res.send(await x);
-  }
-  pipe(
+  const data = pipe(
     url,
     getData,
     loadCheerio,
-    linkedin.extractLinkedInJobDescriptions,
-    asynclog,
-    //writeToFile
+    linkedin.extractLinkedInJobDescriptions
   )
-  // res.send('details');
+  // res.setHeader('Content-Type', 'text/html')
+  const html = await data;
+  res.send(html);
 })
 
 function getSeek(url: string){
