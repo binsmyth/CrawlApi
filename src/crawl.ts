@@ -1,13 +1,19 @@
 import * as cheerio from 'cheerio';
 import axios, { AxiosResponse } from 'axios';
 import { db } from './lib/connectfirestore';
-import { collection, getDocs, QuerySnapshot, setDoc, doc, CollectionReference, DocumentData } from 'firebase/firestore/lite';
+import { collection, getDocs, QuerySnapshot, setDoc, doc, CollectionReference, DocumentData, updateDoc } from 'firebase/firestore/lite';
 import * as TE from 'fp-ts/TaskEither';
 import * as E from 'fp-ts/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { curry } from './lib/curry';
 import 'firebase/firestore';
 import * as d from 'fp-ts/Date';
+import { Request } from 'express';
+import { buildUrlString } from './lib/getDescription';
+import { LinkedIn } from './LinkedIn';
+import { validfirestoredocs } from './lib/validfirestoredocs';
+
+const linkedin = new LinkedIn();
 
 export interface Job {
     company: string;
@@ -49,7 +55,7 @@ function getJobCollection(): (A: string)=> CollectionReference<DocumentData>{
 export async function insertIntoDb(site: string, jobs: Promise<Job[]>): Promise<void> {
     const curriedJobCollection = getJobCollection();
     const date = d.create();
-    const insertFireDb = (date: Date) => async({company, title, href, site}: jobsite) => await setDoc(doc(curriedJobCollection('jobs'),`${href}`.replace(/\D/g, "")), {'company':company, 'title': title, 'href': href, 'site': site, 'crawled_date': date});
+    const insertFireDb = (date: Date) => async({company, title, href, site}: jobsite) => await setDoc(doc(curriedJobCollection('jobs'),validfirestoredocs(href)), {'company':company, 'title': title, 'href': href, 'site': site, 'crawled_date': date});
 
     //This puts job details into firebase store
     const jobadd  = (await jobs).map(({ company, title, href })=>{
@@ -63,10 +69,18 @@ export async function insertIntoDb(site: string, jobs: Promise<Job[]>): Promise<
     await Promise.all(jobadd);
 }
 
+export async function insertTechStackIntoDb(req : any, data : any){
+    const curriedJobCollection = getJobCollection();
+    const insertFireDb = async(url:any) => await updateDoc(doc(curriedJobCollection('jobs'),validfirestoredocs(url)),{techkeywords:data});
+    pipe(
+        req.query.href,
+        insertFireDb,
+        async(x) => console.log(await x)
+    )
+}
+
 //For viewing all database from firebase
 export function getDataFirebase (): Promise<any> {
-    // const jobCollection = (database:any , collectid:any) => collection(database, collectid);
-    // const curriedJobCollection = curry(jobCollection)(db);
     const curriedJobCollection = getJobCollection();
     const querySnapshot = async (jobCollect:any):Promise<QuerySnapshot<unknown>> => await getDocs(jobCollect);
     const alljobs = async (querySnapshot:any) => (await querySnapshot).docs.map((snapshot:any) => snapshot.data());
@@ -76,4 +90,17 @@ export function getDataFirebase (): Promise<any> {
         querySnapshot,
         alljobs
     )
+}
+//For viewing detail of each jobs
+export function getJobDetails (req: Request){
+    const href = req.query.href;
+    const site = req.query.site;
+    const url : string = buildUrlString(href, site);
+    const data = pipe(
+        url,
+        getData,
+        loadCheerio,
+        linkedin.extractLinkedInJobDescriptions
+    )
+    return data;
 }

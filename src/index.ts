@@ -3,10 +3,10 @@ import * as path from 'path';
 import { curry } from './lib/curry';
 import express, {Request, Response} from 'express';
 import { connectpostgres } from './lib/connectpostgres';
-import { getData, getDataFirebase, insertIntoDb, loadCheerio } from './crawl';
-import { buildUrlString } from './lib/getDescription';
+import { getData, getDataFirebase, getJobDetails, insertIntoDb, insertTechStackIntoDb, loadCheerio } from './crawl';
 import { LinkedIn } from './LinkedIn';
 import { Seek } from './Seek';
+import { matchKeywords, uniqueKeywords } from './lib/techstackwords';
 
 const cors = require('cors');
 
@@ -35,25 +35,28 @@ app.get('/linkedin/:id?', (req: Request, res: Response) => {
   getLinkedIn(`https://au.linkedin.com/jobs/search?keywords=react&location=Victoria%2C%20Australia&geoId=&trk=public_jobs_jobs-search-bar_search-submit&position=1&pageNum=${req.params.id === '1' ? req.params.id : (Number(req.params.id) * 25).toString()}`);
 });
 
-app.get('/view/seek', async (req: Request, res: Response) => {
+app.get('/view', async (req: Request, res: Response) => {
   const data = await getDataFirebase();
   res.send(data)
 })
 
+
+
 //Get Clicked Job Detail
 app.get('/view/detail', async (req:Request, res:Response) =>{
-  const href = req.query.href;
-  const site = req.query.site;
-  const url : string = buildUrlString(href, site);
-  const data = pipe(
-    url,
-    getData,
-    loadCheerio,
-    linkedin.extractLinkedInJobDescriptions
-  )
-  // res.setHeader('Content-Type', 'text/html')
+  const data = getJobDetails(req);
   const html = await data;
   res.send(html);
+})
+
+//This is for getting tech stack when user clicks. It also inserts into firebase
+app.get('/get/tech-stack', async(req:Request, res:Response)=>{
+  const data = getJobDetails(req);
+  const html = await data;
+  //insert tech-stack into friebase ...function needed
+  console.log(pipe(html,matchKeywords,uniqueKeywords));
+  insertTechStackIntoDb(req,pipe(html, matchKeywords,uniqueKeywords));
+  res.send(matchKeywords(html));
 })
 
 function getSeek(url: string){
