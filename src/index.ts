@@ -54,7 +54,6 @@ app.get('/get/tech-stack', async(req:Request, res:Response)=>{
   const data = getJobDetails(req);
   const html = await data;
   //insert tech-stack into friebase ...function needed
-  console.log(pipe(html,matchKeywords,uniqueKeywords));
   insertTechStackIntoDb(req,pipe(html, matchKeywords,uniqueKeywords));
   res.send(matchKeywords(html));
 })
