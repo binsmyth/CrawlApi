@@ -1,4 +1,7 @@
 import { Job } from "./crawl";
+import { curry } from "./lib/curry";
+import { getData, getDataFirebase, getJobDetails, insertIntoDb, insertNotesIntoDb, insertTechStackIntoDb, loadCheerio } from './crawl';
+import { pipe } from "fp-ts/lib/function";
 
 export class Seek{
     constructor(){}
@@ -15,4 +18,14 @@ export class Seek{
             };
         });
     }
+    getSeek(url: string){
+        const insertSeekIntoDb = curry(insertIntoDb)('seek');//
+        pipe(
+          url,
+          getData,
+          loadCheerio,
+          this.extractSeekDetails,
+          insertSeekIntoDb
+        );
+      }
 }

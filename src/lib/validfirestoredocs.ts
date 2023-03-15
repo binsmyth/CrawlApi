@@ -1,3 +1,3 @@
-export function validfirestoredocs(href : string|undefined){
-    return `${href}`.replace(/\D/g,"");
+export function validfirestoredocs(href : string | any){
+    return `${decodeURIComponent(href)}`.replace(/\D/g,"");
 }
