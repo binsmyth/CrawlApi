@@ -26,6 +26,7 @@ export class LinkedIn {
     }
 
     getLinkedIn(url:string){
+        console.log("linkedin called");
         const insertLinkedinIntoDb = curry(insertIntoDb)('linkedin');
         pipe(
           url,
