@@ -13,21 +13,10 @@ export class LinkedIn {
         return Array.from(jobCompany()).map((value, index)=>{
             return {
                 company: jobCompany()[index],
-                title:jobTitle()[index],//
+                title:jobTitle()[index],
                 href:url()[index]
             }
         })
-        // return Array.from(jobtitle).map((elem) => {
-        //     const jobCompany = $(elem).find('.base-search-card__info>h4').text().replace(/[\n]/g,'').trim();
-        //     const jobTitle = $(elem).find('.base-search-card__info>h3').text().replace(/[\n]/g,'').trim();
-        //     const url = $(elem).find('.base-card__full-link').attr('href');
-        //     const splitUrl = url?.split('view/')[1].split('?')[0];
-        //     return {
-        //         company: jobCompany,
-        //         title: jobTitle,
-        //         href: splitUrl
-        //     };
-        // });
     }
 
     async extractLinkedInJobDescriptions(loadedCheerio:Promise<cheerio.Root>) : Promise<any>{

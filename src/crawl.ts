@@ -32,6 +32,7 @@ export async function getData(url: string) : Promise<E.Either<Error,AxiosRespons
         (reason)=>new Error(`Couldn't Fetch ${reason}`)
     );
     const result = pipe(getjobs, TE.map((resp) => resp))();
+    console.log(await result);
     return result
 }
 

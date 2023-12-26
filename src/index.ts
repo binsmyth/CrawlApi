@@ -6,12 +6,15 @@ import { connectpostgres } from './lib/connectpostgres';
 import { getData, getDataFirebase, getJobDetails, insertIntoDb, insertNotesIntoDb, insertTechStackIntoDb, loadCheerio } from './crawl';
 import { LinkedIn } from './LinkedIn';
 import { Seek } from './Seek';
-import { matchKeywords, uniqueKeywords } from './lib/techstackwords';//
+import { matchKeywords, uniqueKeywords } from './lib/techstackwords';
+import { Hono } from 'hono';
+
 
 const cors = require('cors');
 
 const PORT: number = 5002; //port number for express
 
+const app1 = new Hono();
 const app = express();  
 const linkedin = new LinkedIn();
 const seek = new Seek();
@@ -19,11 +22,17 @@ const seek = new Seek();
 app.listen(PORT, ()=> console.log(`app running at ${PORT}`));
 app.use(express.static('public'), cors())
 
+app1.get('/app',(c) => {
+  // const { id } = c.req.param();
+  // seek.getSeek(`https://www.seek.com.au/react-jobs-in-information-communication-technology/in-All-Melbourne-VIC?page=${id}`);
+  return c.text('hello');
+})
+
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '/index.html'));
 });
 
-//Route for crawling data from seek
+// Route for crawling data from seek
 app.get('/seek/:id?', (req: Request, res: Response) => {
   res.send('seek called');
   seek.getSeek(`https://www.seek.com.au/react-jobs-in-information-communication-technology/in-All-Melbourne-VIC?page=${req.params.id}`);
