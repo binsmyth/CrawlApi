@@ -1,20 +1,19 @@
 import {pipe} from 'fp-ts/lib/function';
 import * as path from 'path';
 import { curry } from './lib/curry';
-import express, {Request, Response} from 'express';
+import {Request, Response} from 'express';
 import { connectpostgres } from './lib/connectpostgres';
 import { getData, getDataFirebase, getJobDetails, insertIntoDb, insertNotesIntoDb, insertTechStackIntoDb, loadCheerio } from './crawl';
 import { LinkedIn } from './LinkedIn';
 import { Seek } from './Seek';
 import { matchKeywords, uniqueKeywords } from './lib/techstackwords';
 import { Hono } from 'hono';
-
-
+import express = require('express');
 const cors = require('cors');
 
 const PORT: number = 5002; //port number for express
-
-const app1 = new Hono();
+console.log('hello');
+//const app1 = new Hono();
 const app = express();  
 const linkedin = new LinkedIn();
 const seek = new Seek();
@@ -22,11 +21,11 @@ const seek = new Seek();
 app.listen(PORT, ()=> console.log(`app running at ${PORT}`));
 app.use(express.static('public'), cors())
 
-app1.get('/app',(c) => {
-  // const { id } = c.req.param();
-  // seek.getSeek(`https://www.seek.com.au/react-jobs-in-information-communication-technology/in-All-Melbourne-VIC?page=${id}`);
-  return c.text('hello');
-})
+// app1.get('/app',(c) => {
+//   // const { id } = c.req.param();
+//   // seek.getSeek(`https://www.seek.com.au/react-jobs-in-information-communication-technology/in-All-Melbourne-VIC?page=${id}`);
+//   return c.text('hello');
+// })
 
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '/index.html'));
